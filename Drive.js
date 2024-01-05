@@ -46,15 +46,47 @@ const getGoogleSheet = async (sheetName) => {
   return sheet;
 };
 
+// const getAllGoogleSheets = async (sheetName) => {
+//   const doc = new GoogleSpreadsheet(RESPONSES_SHEET_ID, jwt);
+//   await doc.loadInfo();
+
+//   const sheets = [];
+
+//   const sheet = doc.sheetsByIndex[sheetTitle[sheetName]];
+
+//   return sheet;
+// };
+
+const getRowsFromAllSheets = async () => {
+  const allData = [];
+  const doc = new GoogleSpreadsheet(RESPONSES_SHEET_ID, jwt);
+
+  await doc.loadInfo();
+
+  for (const title of Object.keys(sheetTitle)) {
+    const sheetIndex = sheetTitle[title];
+    let sheet = doc.sheetsByIndex[sheetIndex];
+
+    // Get all the rows
+    let rows = await sheet.getRows();
+    rows.forEach((row, index) => console.log(row._rawData, index));
+  }
+  console.log(allData);
+};
+
+getRowsFromAllSheets();
+
 const addRowToSheet = async (sheet, row) => {
-  // const sheet = await getGoogleSheet(sheetName);
   await sheet.addRow(row);
 };
 
-const printAllRows = async (sheet) => {
-  const rows = await sheet.getRows();
-  rows.forEach((row) => console.log(row._rawData));
-};
+// const printAllRows = async (sheet) => {
+//   const rows = await sheet.getRows();
+//   console.log(rows[0].PROPERTY1);
+//   // const rows = await sheet.getRows();
+//   rows.forEach((row) => console.log(row._rawData));
+// };
+
 const findRow = async (sheet, id) => {
   const rows = await sheet.getRows();
   const row = rows.find((row) => row.get("id") === id);
@@ -65,42 +97,6 @@ const updateRow = async (sheet, id, updatedData) => {
   const row = await findRow(sheet, id);
   row.assign(updatedData);
   await row.save();
-};
-
-const main = async () => {
-  const sheet = await getGoogleSheet();
-  // addRowToSheet(sheet, { id: '3', name: 'qwertyui K', email: 'qwertyui@google.com' })
-  // printAllRows(sheet)
-};
-
-main();
-
-// Credentials for the service account
-// const CREDENTIALS = JSON.parse(fs.readFileSync('youtubedemo-rwcl-0663f7394d57.json'));
-
-const getRow = async (email) => {
-  // use service account creds
-  await doc.useServiceAccountAuth({
-    client_email: CREDENTIALS.client_email,
-    private_key: CREDENTIALS.private_key,
-  });
-
-  // load the documents info
-  await doc.loadInfo();
-
-  // Index of the sheet
-  let sheet = doc.sheetsByIndex[0];
-
-  // Get all the rows
-  let rows = await sheet.getRows();
-
-  for (let index = 0; index < rows.length; index++) {
-    const row = rows[index];
-    if (row.email == email) {
-      console.log(row.user_name);
-      console.log(row.password);
-    }
-  }
 };
 
 // getRow('email@gmail.com');
@@ -180,7 +176,8 @@ const deleteRow = async (keyValue, thisValue) => {
 module.exports = {
   getGoogleSheet,
   addRowToSheet,
-  printAllRows,
+  // printAllRows,
   findRow,
   updateRow,
+  // getRowsFromAllSheets,
 };

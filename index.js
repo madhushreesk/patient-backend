@@ -8,6 +8,7 @@ const {
   findRow,
   updateRow,
   deleteRow,
+  //   getRowsFromAllSheets,
 } = require("./Drive");
 
 const app = express();
@@ -18,21 +19,23 @@ app.use(bodyParser.json());
 
 app.post("/dashboard/addPatients", (req, res) => {
   const {
-    physicianID,
-    patientID,
-    patientName,
-    location,
-    gender,
-    address,
-    phone,
-    age,
-    prescription,
-    dose,
-    visit_date,
-    next_visit,
-    bill,
-    physicianName,
-    physicianNumber,
+    PhysicianID,
+    PatientID,
+    first_name,
+    last_name,
+    Location,
+    Gender,
+    Address,
+    Phone,
+    Age,
+    Next_Visit,
+    Prescription,
+    Dose,
+    Visit_Date,
+    Physician_first_name,
+    Physician_last_name,
+    PhysicianNumber,
+    Bill,
   } = req.body;
 
   const addPatient = async () => {
@@ -42,10 +45,10 @@ app.post("/dashboard/addPatients", (req, res) => {
 
       await addRowToSheet(sheet, {
         appointmentID: "123",
-        patientID: patientID,
-        physicianID: physicianID,
-        visit_date: visit_date,
-        next_visit: next_visit,
+        PatientID: PatientID,
+        PhysicianID: PhysicianID,
+        Visit_Date: Visit_Date,
+        Next_Visit: Next_Visit,
       });
     } catch (error) {
       console.error("An error occurred:", error.message);
@@ -54,11 +57,11 @@ app.post("/dashboard/addPatients", (req, res) => {
       const sheetName = "prescribes";
       const sheet = await getGoogleSheet(sheetName);
       await addRowToSheet(sheet, {
-        physicianID: physicianID,
-        patientID: patientID,
-        prescription: prescription,
-        dose: dose,
-        bill: bill,
+        PhysicianID: PhysicianID,
+        PatientID: PatientID,
+        Prescription: Prescription,
+        Dose: Dose,
+        Bill: Bill,
       });
     } catch (error) {
       console.error("An error occurred:", error.message);
@@ -68,12 +71,14 @@ app.post("/dashboard/addPatients", (req, res) => {
       const sheetName = "patient";
       const sheet = await getGoogleSheet(sheetName);
       await addRowToSheet(sheet, {
-        patientName: patientName,
-        address: address,
-        location: location,
-        age: age,
-        gender: gender,
-        phone: phone,
+        First_Name: first_name,
+        Last_Name: last_name,
+        Address: Address,
+        Location: Location,
+        Age: Age,
+        Gender: Gender,
+        Phone: Phone,
+        PatientID: PatientID,
       });
     } catch (error) {
       console.error("An error occurred:", error.message);
@@ -83,9 +88,11 @@ app.post("/dashboard/addPatients", (req, res) => {
       const sheetName = "physician";
       const sheet = await getGoogleSheet(sheetName);
       await addRowToSheet(sheet, {
-        physicianID: physicianID,
-        physicianName: physicianName,
-        physicianNumber: physicianNumber,
+        PhysicianID: PhysicianID,
+        Physician_first_name: Physician_first_name,
+        Physician_last_name: Physician_last_name,
+        PhysicianNumber: PhysicianNumber,
+        PatientID: PatientID,
       });
     } catch (error) {
       console.error("An error occurred:", error.message);
@@ -94,6 +101,8 @@ app.post("/dashboard/addPatients", (req, res) => {
   };
   addPatient();
 });
+
+// getRowsFromAllSheets();
 
 const port = 8080;
 

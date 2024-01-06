@@ -73,22 +73,23 @@ const getRowsFromAllSheets = async () => {
 const addRowToSheet = async (sheet, data) => {
   await sheet.addRow(data);
 };
-
 const findRow = async (sheet, PatientID) => {
   const rows = await sheet.getRows();
+
   const row = rows.find((row) => row.get("PatientID") === PatientID);
+
   return row;
 };
 
 const updateRow = async (sheet, PatientID, updatedData) => {
   // console.log(PatientID);
   const row = await findRow(sheet, PatientID);
+  console.log(row);
   row.assign(updatedData);
   await row.save();
 };
 
 const addRow = async (rows) => {
-  // use service account creds
   await doc.useServiceAccountAuth({
     client_email: CREDENTIALS.client_email,
     private_key: CREDENTIALS.private_key,

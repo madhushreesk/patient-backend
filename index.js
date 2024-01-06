@@ -262,6 +262,22 @@ app.post("/dashboard/editPatient_form", (req, res) => {
   editPatient();
 });
 
+app.get("/dashboard/search", async (req, res) => {
+  const search = req.query.search;
+  const sheetName = "patient";
+  const sheet = await getGoogleSheet(sheetName);
+
+  try {
+    const row = await findRow(sheet, search);
+    console.log(row._rawData);
+
+    res.send({ msg: "success", row: row._rawData });
+  } catch (error) {
+    console.error("Error", error.message);
+    res.status(500).send({ msg: "error", error: error.message });
+  }
+});
+
 const port = 8080;
 
 app.listen(port, () => {

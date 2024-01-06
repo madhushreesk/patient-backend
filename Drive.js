@@ -46,17 +46,6 @@ const getGoogleSheet = async (sheetName) => {
   return sheet;
 };
 
-// const getAllGoogleSheets = async (sheetName) => {
-//   const doc = new GoogleSpreadsheet(RESPONSES_SHEET_ID, jwt);
-//   await doc.loadInfo();
-
-//   const sheets = [];
-
-//   const sheet = doc.sheetsByIndex[sheetTitle[sheetName]];
-
-//   return sheet;
-// };
-
 const getRowsFromAllSheets = async () => {
   const allData = [];
   const doc = new GoogleSpreadsheet(RESPONSES_SHEET_ID, jwt);
@@ -69,23 +58,21 @@ const getRowsFromAllSheets = async () => {
 
     // Get all the rows
     let rows = await sheet.getRows();
-    rows.forEach((row, index) => console.log(row._rawData, index));
+    rows.forEach((row, index) => {
+      const rowData = row._rawData;
+      if (!allData[index]) {
+        allData[index] = [...rowData];
+      } else allData[index].push(...rowData);
+    });
   }
-  console.log(allData);
+  return allData;
 };
 
-getRowsFromAllSheets();
+// getRowsFromAllSheets();
 
-const addRowToSheet = async (sheet, row) => {
-  await sheet.addRow(row);
+const addRowToSheet = async (sheet, data) => {
+  await sheet.addRow(data);
 };
-
-// const printAllRows = async (sheet) => {
-//   const rows = await sheet.getRows();
-//   console.log(rows[0].PROPERTY1);
-//   // const rows = await sheet.getRows();
-//   rows.forEach((row) => console.log(row._rawData));
-// };
 
 const findRow = async (sheet, id) => {
   const rows = await sheet.getRows();
@@ -98,8 +85,6 @@ const updateRow = async (sheet, id, updatedData) => {
   row.assign(updatedData);
   await row.save();
 };
-
-// getRow('email@gmail.com');
 
 const addRow = async (rows) => {
   // use service account creds
@@ -176,8 +161,6 @@ const deleteRow = async (keyValue, thisValue) => {
 module.exports = {
   getGoogleSheet,
   addRowToSheet,
-  // printAllRows,
   findRow,
   updateRow,
-  // getRowsFromAllSheets,
 };

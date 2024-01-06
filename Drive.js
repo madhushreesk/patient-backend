@@ -74,14 +74,15 @@ const addRowToSheet = async (sheet, data) => {
   await sheet.addRow(data);
 };
 
-const findRow = async (sheet, id) => {
+const findRow = async (sheet, PatientID) => {
   const rows = await sheet.getRows();
-  const row = rows.find((row) => row.get("id") === id);
+  const row = rows.find((row) => row.get("PatientID") === PatientID);
   return row;
 };
 
-const updateRow = async (sheet, id, updatedData) => {
-  const row = await findRow(sheet, id);
+const updateRow = async (sheet, PatientID, updatedData) => {
+  // console.log(PatientID);
+  const row = await findRow(sheet, PatientID);
   row.assign(updatedData);
   await row.save();
 };

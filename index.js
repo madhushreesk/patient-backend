@@ -194,7 +194,7 @@ app.post("/dashboard/editPatient_form", (req, res) => {
       const sheetName = "appointment";
       const sheet = await getGoogleSheet(sheetName);
 
-      await updateRow(sheet, {
+      await updateRow(sheet, PatientID, {
         appointmentID: "123",
         PatientID: PatientID,
         PhysicianID: PhysicianID,
@@ -202,12 +202,12 @@ app.post("/dashboard/editPatient_form", (req, res) => {
         Next_Visit: Next_Visit,
       });
     } catch (error) {
-      console.error("An error occurred:", error.message);
+      console.error("An error occurred in edit:", error.message);
     }
     try {
       const sheetName = "prescribes";
       const sheet = await getGoogleSheet(sheetName);
-      await updateRow(sheet, {
+      await updateRow(sheet, PatientID, {
         PhysicianID: PhysicianID,
         PatientID: PatientID,
         Prescription: Prescription,
@@ -221,7 +221,7 @@ app.post("/dashboard/editPatient_form", (req, res) => {
     try {
       const sheetName = "patient";
       const sheet = await getGoogleSheet(sheetName);
-      await updateRow(sheet, {
+      await updateRow(sheet, PatientID, {
         First_Name: first_name,
         Last_Name: last_name,
         Address: Address,
@@ -230,6 +230,15 @@ app.post("/dashboard/editPatient_form", (req, res) => {
         Gender: Gender,
         Phone: Phone,
         PatientID: PatientID,
+        PhysicianID: PhysicianID,
+        Physician_first_name: Physician_first_name,
+        Physician_last_name: Physician_last_name,
+        PhysicianNumber: PhysicianNumber,
+        Prescription: Prescription,
+        Bill: Bill,
+        Dose: Dose,
+        Visit_Date: Visit_Date,
+        Next_Visit: Next_Visit,
       });
     } catch (error) {
       console.error("An error occurred:", error.message);
@@ -238,7 +247,7 @@ app.post("/dashboard/editPatient_form", (req, res) => {
     try {
       const sheetName = "physician";
       const sheet = await getGoogleSheet(sheetName);
-      await updateRow(sheet, {
+      await updateRow(sheet, PatientID, {
         PhysicianID: PhysicianID,
         Physician_first_name: Physician_first_name,
         Physician_last_name: Physician_last_name,

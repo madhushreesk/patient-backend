@@ -46,39 +46,71 @@ const getGoogleSheet = async (sheetName) => {
   return sheet;
 };
 
-const getRowsFromAllSheets = async () => {
-  const allData = [];
-  const doc = new GoogleSpreadsheet(RESPONSES_SHEET_ID, jwt);
+const keys = [
+  "First_Name",
+  "Last_Name",
+  "Address",
+  "Location",
+  "Age",
+  "Gender",
+  "Phone",
+  "PatientID",
+  "PhysicianID",
+  "Physician_first_name",
+  "Physician_last_name",
+  "PhysicianNumber",
+  "Prescription",
+  "Bill",
+  "Dose",
+  "Visit_Date",
+  "Next_Visit",
+];
 
-  await doc.loadInfo();
+function createPatientObject(keys, values) {
+  const patientObject = {};
 
-  for (const title of Object.keys(sheetTitle)) {
-    const sheetIndex = sheetTitle[title];
-    let sheet = doc.sheetsByIndex[sheetIndex];
+  keys.forEach((key, index) => {
+    patientObject[key] = values[index];
+  });
 
-    // Get all the rows
-    let rows = await sheet.getRows();
-    rows.forEach((row, index) => {
-      const rowData = row._rawData;
-      if (!allData[index]) {
-        allData[index] = [...rowData];
-      } else allData[index].push(...rowData);
-    });
-  }
-  return allData;
-};
-
-// getRowsFromAllSheets();
+  return patientObject;
+}
 
 const addRowToSheet = async (sheet, data) => {
   await sheet.addRow(data);
 };
 const findRow = async (sheet, PatientID) => {
   const rows = await sheet.getRows();
-
   const row = rows.find((row) => row.get("PatientID") === PatientID);
-
   return row;
+};
+
+const getAllRows = async (sheet) => {
+  const allRows = await sheet.getRows();
+
+  const rowsArr = [];
+  allRows.forEach((row) =>
+    rowsArr.push(createPatientObject(keys, row._rawData))
+  );
+  return rowsArr;
+};
+
+const findRowByQuery = async (sheet, searchQuery) => {
+  const allRows = await sheet.getRows();
+  const searchQueryLowerCase = searchQuery.toLowerCase();
+  const resultRows = allRows.filter((row) => {
+    return (
+      row.get("PatientID").toLowerCase().includes(searchQueryLowerCase) ||
+      row.get("First_Name").toLowerCase().includes(searchQueryLowerCase) ||
+      row.get("Last_Name").toLowerCase().includes(searchQueryLowerCase) ||
+      row.get("Phone").toLowerCase().includes(searchQueryLowerCase)
+    );
+  });
+  const rowsArr = [];
+  resultRows.forEach((row) =>
+    rowsArr.push(createPatientObject(keys, row._rawData))
+  );
+  return rowsArr;
 };
 
 const updateRow = async (sheet, PatientID, updatedData) => {
@@ -165,4 +197,6 @@ module.exports = {
   addRowToSheet,
   findRow,
   updateRow,
+  findRowByQuery,
+  getAllRows,
 };

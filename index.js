@@ -10,6 +10,8 @@ const {
   findRow,
   updateRow,
   deleteRow,
+  findRowByQuery,
+  getAllRows,
 } = require("./Drive");
 
 const CREDENTIALS = {
@@ -143,27 +145,17 @@ app.post("/dashboard/addPatients", (req, res) => {
 });
 
 const sheetTitle = { appointment: 0, prescribes: 1, patient: 2, physician: 3 };
+
+const getSheetData = async (sheetName) => {
+  const sheet = await getGoogleSheet(sheetName);
+  return sheet;
+};
 app.get("/dashboard/getAllDetails", (req, res) => {
   const getRowsFromAllSheets = async () => {
-    const allData = [];
-    const doc = new GoogleSpreadsheet(RESPONSES_SHEET_ID, jwt);
-    await doc.loadInfo();
-    for (const title of Object.keys(sheetTitle)) {
-      const sheetIndex = sheetTitle[title];
-      let sheet = doc.sheetsByIndex[sheetIndex];
+    const sheet = await getSheetData("patient");
+    const data = await getAllRows(sheet);
 
-      let rows = await sheet.getRows();
-
-      console.log(rows);
-      rows.forEach((row, index) => {
-        const rowData = row._rawData;
-        if (!allData[index]) {
-          allData[index] = [...rowData];
-        } else allData[index].push(...rowData);
-      });
-    }
-
-    res.send({ msg: "success", allData });
+    res.send({ msg: "success", data });
   };
   getRowsFromAllSheets();
 });
@@ -268,10 +260,10 @@ app.get("/dashboard/search", async (req, res) => {
   const sheet = await getGoogleSheet(sheetName);
 
   try {
-    const row = await findRow(sheet, search);
-    console.log(row._rawData);
+    const row = await findRowByQuery(sheet, search);
+    // console.log("roe", row._rawData);
 
-    res.send({ msg: "success", row: row._rawData });
+    res.send({ msg: "success", row: row });
   } catch (error) {
     console.error("Error", error.message);
     res.status(500).send({ msg: "error", error: error.message });

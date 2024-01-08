@@ -6,7 +6,7 @@ const {
   findRowByQuery,
   getAllRows,
 } = require("./src/helper.js");
-const { addPatientToDb, editPatientToDb } = require("./src/crud.js");
+const { addPatientToDb, editPatientInDb } = require("./src/crud.js");
 
 const app = express();
 app.use(express.json());
@@ -20,7 +20,7 @@ app.post("/dashboard/addPatients", (req, res) => {
 });
 
 app.post("/dashboard/editPatient", (req, res) => {
-  editPatientToDb(req.body, res);
+  editPatientInDb(req.body, res);
 });
 
 app.get("/dashboard/search", async (req, res) => {
@@ -49,5 +49,5 @@ app.get("/dashboard/getAllDetails", (req, res) => {
 const port = 4000;
 
 app.listen(port, () => {
-  console.log(`Server is running at ${port}`);
+  console.log(`Server is running at http://18.196.85.188:${port}`);
 });

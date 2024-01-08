@@ -1,8 +1,12 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { getGoogleSheet, findRowByQuery, getAllRows } = require("./helper");
-const { addPatientToDb, editPatientInDb } = require("./crud");
+const {
+  getGoogleSheet,
+  findRowByQuery,
+  getAllRows,
+} = require("./src/helper.js");
+const { addPatientToDb, editPatientInDb } = require("./src/crud.js");
 
 const app = express();
 app.use(express.json());

@@ -1,5 +1,7 @@
-const { GoogleSpreadsheet } = require("google-spreadsheet");
+const { dbKeys, RESPONSES_SHEET_ID, SCOPES } = require("./constants");
 const { JWT } = require("google-auth-library");
+const { GoogleSpreadsheet } = require("google-spreadsheet");
+require("dotenv").config();
 
 const CREDENTIALS = {
   type: "service_account",
@@ -17,56 +19,15 @@ const CREDENTIALS = {
   universe_domain: "googleapis.com",
 };
 
-// Google sheet npm package
-
-// File handling package
-const fs = require("fs");
-
-const SCOPES = [
-  "https://www.googleapis.com/auth/spreadsheets",
-  "https://www.googleapis.com/auth/drive.file",
-];
 const jwt = new JWT({
   email: CREDENTIALS.client_email,
   key: CREDENTIALS.private_key,
   scopes: SCOPES,
 });
 
-const RESPONSES_SHEET_ID = "1eqfstDJns9feBFN7rW5pCKlHqg4yzhkryCa78_kM9Qs";
-
-// Create a new document
-
 const sheetTitle = { appointment: 0, prescribes: 1, patient: 2, physician: 3 };
-const getGoogleSheet = async (sheetName) => {
-  const doc = new GoogleSpreadsheet(RESPONSES_SHEET_ID, jwt);
-  await doc.loadInfo();
 
-  const sheet = doc.sheetsByIndex[sheetTitle[sheetName]];
-
-  return sheet;
-};
-
-const keys = [
-  "First_Name",
-  "Last_Name",
-  "Address",
-  "Location",
-  "Age",
-  "Gender",
-  "Phone",
-  "PatientID",
-  "PhysicianID",
-  "Physician_first_name",
-  "Physician_last_name",
-  "PhysicianNumber",
-  "Prescription",
-  "Bill",
-  "Dose",
-  "Visit_Date",
-  "Next_Visit",
-];
-
-function createPatientObject(keys, values) {
+const createPatientObject = (keys, values) => {
   const patientObject = {};
 
   keys.forEach((key, index) => {
@@ -74,15 +35,16 @@ function createPatientObject(keys, values) {
   });
 
   return patientObject;
-}
+};
+
+const updateRow = async (sheet, PatientID, updatedData) => {
+  const row = await findRow(sheet, PatientID);
+  row.assign(updatedData);
+  await row.save();
+};
 
 const addRowToSheet = async (sheet, data) => {
   await sheet.addRow(data);
-};
-const findRow = async (sheet, PatientID) => {
-  const rows = await sheet.getRows();
-  const row = rows.find((row) => row.get("PatientID") === PatientID);
-  return row;
 };
 
 const getAllRows = async (sheet) => {
@@ -90,9 +52,26 @@ const getAllRows = async (sheet) => {
 
   const rowsArr = [];
   allRows.forEach((row) =>
-    rowsArr.push(createPatientObject(keys, row._rawData))
+    rowsArr.push(createPatientObject(dbKeys, row._rawData))
   );
   return rowsArr;
+};
+
+const findRow = async (sheet, PatientID) => {
+  const rows = await sheet.getRows();
+  const row = rows.find((row) => row.get("PatientID") === PatientID);
+  return row;
+};
+
+const getGoogleSheet = async (sheetName) => {
+  try {
+    const doc = new GoogleSpreadsheet(RESPONSES_SHEET_ID, jwt);
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[sheetTitle[sheetName]];
+    return sheet;
+  } catch (error) {
+    console.log("sheet not found", error.message);
+  }
 };
 
 const findRowByQuery = async (sheet, searchQuery) => {
@@ -103,100 +82,23 @@ const findRowByQuery = async (sheet, searchQuery) => {
       row.get("PatientID").toLowerCase().includes(searchQueryLowerCase) ||
       row.get("First_Name").toLowerCase().includes(searchQueryLowerCase) ||
       row.get("Last_Name").toLowerCase().includes(searchQueryLowerCase) ||
-      row.get("Phone").toLowerCase().includes(searchQueryLowerCase)
+      row.get("Phone").toLowerCase().includes(searchQueryLowerCase) ||
+      row.get("Location").toLowerCase().includes(searchQueryLowerCase)
     );
   });
   const rowsArr = [];
   resultRows.forEach((row) =>
-    rowsArr.push(createPatientObject(keys, row._rawData))
+    rowsArr.push(createPatientObject(dbKeys, row._rawData))
   );
   return rowsArr;
 };
 
-const updateRow = async (sheet, PatientID, updatedData) => {
-  // console.log(PatientID);
-  const row = await findRow(sheet, PatientID);
-  console.log(row);
-  row.assign(updatedData);
-  await row.save();
-};
-
-const addRow = async (rows) => {
-  await doc.useServiceAccountAuth({
-    client_email: CREDENTIALS.client_email,
-    private_key: CREDENTIALS.private_key,
-  });
-
-  await doc.loadInfo();
-
-  // Index of the sheet
-  let sheet = doc.sheetsByIndex[0];
-
-  for (let index = 0; index < rows.length; index++) {
-    const row = rows[index];
-    await sheet.addRow(row);
-  }
-};
-
-let rows = [
-  {
-    first_name: "test",
-    last_name: "works",
-    Location: "Delhi",
-    Age: "22",
-    Phone: "123456",
-    Gender: "F",
-    Address: "lorem ipsum",
-    Prescription: "hcsj xsbjk bjdks",
-    Dose: "dolo",
-    Physician_first_name: "qwerty",
-    Physician_last_name: "poiuyt",
-    Physician_Number: "098765",
-    Bill: "500",
-    Next_Visit: "22-3-2022",
-    Physician_ID: "phy12",
-    Patient_ID: "pat02",
-    Visit_Date: "12-3-2022",
-  },
-  {
-    email: "email@gmail.com",
-    user_name: "dilip",
-    password: "abcd@1234",
-  },
-];
-
-// addRow(rows);
-
-// updateRow('email', 'email@gmail.com', 'ramesh@ramesh.com')
-
-const deleteRow = async (keyValue, thisValue) => {
-  // use service account creds
-  await doc.useServiceAccountAuth({
-    client_email: CREDENTIALS.client_email,
-    private_key: CREDENTIALS.private_key,
-  });
-
-  await doc.loadInfo();
-
-  // Index of the sheet
-  let sheet = doc.sheetsByIndex[0];
-
-  let rows = await sheet.getRows();
-
-  for (let index = 0; index < rows.length; index++) {
-    const row = rows[index];
-    if (row[keyValue] === thisValue) {
-      await rows[index].delete();
-      break;
-    }
-  }
-};
-
 module.exports = {
-  getGoogleSheet,
+  createPatientObject,
   addRowToSheet,
   findRow,
+  getGoogleSheet,
+  getAllRows,
   updateRow,
   findRowByQuery,
-  getAllRows,
 };

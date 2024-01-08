@@ -6,7 +6,7 @@ const {
   findRowByQuery,
   getAllRows,
 } = require("./src/helper.js");
-const { addPatientToDb, editPatientInDb } = require("./src/crud.js");
+const { addPatientToDb, editPatientToDb } = require("./src/crud.js");
 
 const app = express();
 app.use(express.json());
@@ -20,7 +20,7 @@ app.post("/dashboard/addPatients", (req, res) => {
 });
 
 app.post("/dashboard/editPatient", (req, res) => {
-  editPatientInDb(req.body, res);
+  editPatientToDb(req.body, res);
 });
 
 app.get("/dashboard/search", async (req, res) => {
@@ -29,7 +29,7 @@ app.get("/dashboard/search", async (req, res) => {
     const sheet = await getGoogleSheet("patient");
 
     const data = await findRowByQuery(sheet, search);
-    res.send({ data });
+    res.send({ msg: "success", data });
   } catch (error) {
     console.error("Error", error.message);
     res.status(500).send({ msg: "error", error: error.message });
@@ -41,7 +41,7 @@ app.get("/dashboard/getAllDetails", (req, res) => {
     const sheet = await getGoogleSheet("patient");
 
     const data = await getAllRows(sheet);
-    res.send({ data });
+    res.send({ msg: "success", data });
   };
   getRowsFromAllSheets();
 });

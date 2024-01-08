@@ -1,37 +1,33 @@
 const { expect } = require("chai");
-const yourModule = require("./yourFile"); // Replace with the actual file path
-
-// Mock getGoogleSheet function
-const mockGetGoogleSheet = async () => "mocked-sheet";
-// Mock addRowToSheet function
-const mockAddRowToSheet = async (sheet, data) => {
-  // Do nothing for the mock, as we are not testing the actual Google Sheet interactions here
-};
-
-// Replace the real functions with mocks
-yourModule.getGoogleSheet = mockGetGoogleSheet;
-yourModule.addRowToSheet = mockAddRowToSheet;
+const sinon = require("sinon");
+const { addPatientToDb } = require("../src/crud.js");
 
 describe("Positive Test Case - Add Patient", function () {
   it("should add a patient to the Google Sheet successfully", async function () {
+    const mockGetGoogleSheet = sinon.stub().resolves("mocked-sheet");
+    const mockAddRowToSheet = sinon.stub().resolves();
+
+    sinon.replace(yourModule, "getGoogleSheet", mockGetGoogleSheet);
+    sinon.replace(yourModule, "addRowToSheet", mockAddRowToSheet);
+
     // Valid patient data
     const validPatientData = {
       PhysicianID: "123",
-      // ... other patient data ...
     };
 
     // Mock Express response object
     const res = {
-      status: (status) => ({
-        send: (message) => {
-          // Assertions
-          expect(status).to.equal(200);
-          expect(message).to.equal("Success");
-        },
-      }),
+      status: sinon.stub().returnsThis(),
+      send: sinon.stub(),
     };
 
-    // Call the function with the test data
-    await yourModule.addPatientToDb(validPatientData, res);
+    await addPatientToDb(validPatientData, res);
+
+    // Assertions
+    expect(res.status.calledOnceWith(200)).to.be.true;
+    expect(res.send.calledOnceWith("Success")).to.be.true;
+
+    // Restore the original functions
+    sinon.restore();
   });
 });

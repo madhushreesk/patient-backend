@@ -29,7 +29,7 @@ app.get("/dashboard/search", async (req, res) => {
     const sheet = await getGoogleSheet("patient");
 
     const data = await findRowByQuery(sheet, search);
-    res.send({ msg: "success", data });
+    res.send({ data });
   } catch (error) {
     console.error("Error", error.message);
     res.status(500).send({ msg: "error", error: error.message });
@@ -41,7 +41,7 @@ app.get("/dashboard/getAllDetails", (req, res) => {
     const sheet = await getGoogleSheet("patient");
 
     const data = await getAllRows(sheet);
-    res.send({ msg: "success", data });
+    res.send({ data });
   };
   getRowsFromAllSheets();
 });

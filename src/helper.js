@@ -80,10 +80,11 @@ const findRowByQuery = async (sheet, searchQuery) => {
   const resultRows = allRows.filter((row) => {
     return (
       row.get("PatientID").toLowerCase().includes(searchQueryLowerCase) ||
-      row.get("First_Name").toLowerCase().includes(searchQueryLowerCase) ||
       row.get("Last_Name").toLowerCase().includes(searchQueryLowerCase) ||
+      row.get("First_Name").toLowerCase().includes(searchQueryLowerCase) ||
       row.get("Phone").toLowerCase().includes(searchQueryLowerCase) ||
-      row.get("Location").toLowerCase().includes(searchQueryLowerCase)
+      row.get("Location").toLowerCase().includes(searchQueryLowerCase) ||
+      row.get("Address").toLowerCase().includes(searchQueryLowerCase)
     );
   });
   const rowsArr = [];
